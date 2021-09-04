@@ -114,6 +114,7 @@ void handleRequest(net::windows::stream_handle &pipe, boost::asio::io_context &i
 
 void ServerWaitToRead()
 {
+
     HANDLE hPipe = INVALID_HANDLE_VALUE, hThread = NULL;
     LPCTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe");
 
@@ -148,13 +149,18 @@ void ServerWaitToRead()
     net::windows::stream_handle pipe(ios);
     pipe.assign(hPipe);
     handleRequest(pipe, ios);
+    pipe.close();
+    CloseHandle(hPipe);
 }
 
 int main(int argc, char *argv[])
 {
     try
     {
-        ServerWaitToRead();
+        while (1)
+        {
+            ServerWaitToRead();
+        }
     }
     catch (std::exception const &e)
     {
