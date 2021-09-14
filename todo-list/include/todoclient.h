@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "client.h"
+#include "model.h"
 
 struct findTodosParams
 {
@@ -15,6 +16,7 @@ struct findTodoResponse
 {
     std::string data;
     int code;
+    std::vector<Item> payload;
 };
 
 // defines api tag methods

@@ -19,6 +19,7 @@ int main()
         findTodosParams p;
         findTodoResponse r = ts.findTodos(p);
         std::cout << r.code << " " << r.data << std::endl;
+        std::cout << "item length: " << r.payload.size() << std::endl; 
     }
     catch(std::exception const& e)
     {

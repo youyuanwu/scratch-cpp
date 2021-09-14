@@ -14,14 +14,7 @@ add_subdirectory(runtime)
 
 add_subdirectory(client)
 
-include_directories(
-    ${Boost_INCLUDE_DIR}
-    ${todo-list_SOURCE_DIR}/include
-#    ${cpp-openapi-runtime_INCLUDE_DIR}
-    ${todo-list_SOURCE_DIR}/runtime/include
-    ${todo-list_SOURCE_DIR}/client/beast/include
-    ${cpp-openapi-client-curlpp_SOURCE_DIR}/include
-)
+add_subdirectory(json)
 
 file(GLOB SOURCES
     include/*.h
@@ -30,8 +23,18 @@ file(GLOB SOURCES
 
 add_library(todo-list "${cxx_strict}" ${SOURCES})
 
+target_include_directories(
+    todo-list
+    PUBLIC ${todo-list_SOURCE_DIR}/include
+)
+
+target_link_libraries(todo-list
+  PUBLIC cpp-openapi-runtime 
+  PUBLIC cpp-openapi-json-nlohmann
+)
+
 add_executable("beast_main" beast_main.cpp)
-target_link_libraries("beast_main" PRIVATE ${Boost_LIBRARIES} todo-list cpp-openapi-runtime cpp-openapi-client-beast)
+target_link_libraries("beast_main" PRIVATE ${Boost_LIBRARIES} todo-list cpp-openapi-client-beast)
 
 add_executable("curlpp_main" curlpp_main.cpp)
-target_link_libraries("curlpp_main" PRIVATE ${Boost_LIBRARIES} todo-list cpp-openapi-runtime cpp-openapi-client-curlpp)
+target_link_libraries("curlpp_main" PRIVATE ${Boost_LIBRARIES} todo-list cpp-openapi-client-curlpp)
