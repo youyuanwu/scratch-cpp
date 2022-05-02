@@ -11,6 +11,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <filesystem>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
@@ -176,17 +177,28 @@ http_server(net::local::stream_protocol::acceptor& acceptor, net::local::stream_
 int
 main(int argc, char* argv[])
 {
+    namespace fs = std::filesystem;
+    std::string name("server.sock");
+    fs::path file = fs::current_path().append(name);
     try
     {
         net::io_context ioc{1};
 
-        ::unlink("/tmp/foobar"); // Remove previous binding.
-        net::local::stream_protocol::endpoint ep("/tmp/foobar");
-        net::local::stream_protocol::acceptor acceptor(ioc, ep);
+        #ifdef WIN32
+        fs::remove(file);
+        #else
+        ::unlink(file.c_str()); // Remove previous binding.
+        #endif
+
+        net::local::stream_protocol::endpoint ep(name);
+        net::local::stream_protocol::acceptor acceptor(ioc, ep, false);
         net::local::stream_protocol::socket socket(ioc);
         http_server(acceptor, socket);
 
         ioc.run();
+
+        socket.close();
+        acceptor.close();
     }
     catch(std::exception const& e)
     {

@@ -1,27 +1,37 @@
 #include "asio.hpp"
 #include <string>
 #include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 int main(){
-  try
+
+    std::string name("server.sock");
+    try
     {
     asio::io_context ioc{1};
 
-    std::string name("server.sock");
-        // bool d = DeleteFileA(name.c_str());
-        // if(!d){
-        //     DWORD err = GetLastError();
-        //     if(err != ERROR_FILE_NOT_FOUND){
-        //         std::cerr << "LastError: " << err << std::endl;
-        //         return EXIT_FAILURE;
-        //     }
-        // }
+    fs::path file = fs::current_path().append(name);
+    fs::file_status s;
+    if(fs::exists(file)){
+        fs::remove(file);
+    }
+
     asio::local::stream_protocol::endpoint ep(name);
-    asio::local::stream_protocol::acceptor acceptor(ioc, ep);
+    // do not reuse addr can fix the bug.
+    asio::local::stream_protocol::acceptor acceptor(ioc, ep, false);
     }
     catch(std::exception const& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
+
+    // fs::path file(name);
+    // if(fs::exists(file)){
+    //     fs::remove(file);
+    // }
+
+    return 0;
 }

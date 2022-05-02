@@ -21,3 +21,6 @@ include_directories(${Boost_INCLUDE_DIR})
 
 add_executable("unixsocket" unixsocket.cpp)
 target_link_libraries("unixsocket" PRIVATE ${Boost_LIBRARIES})
+
+add_executable("uclient" uclient.cpp)
+target_link_libraries("uclient" PRIVATE ${Boost_LIBRARIES})
