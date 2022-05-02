@@ -8,7 +8,14 @@ project(io-cpp)
 # add dependencies
 # install boost on ubuntu :  sudo apt-get install libboost-all-dev
 
+if(WIN32)
+set(Boost_USE_STATIC_LIBS ON)
+ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
+find_package(Boost REQUIRED system)
+else()
 find_package(Boost REQUIRED system thread)
+endif()
+
 
 include_directories(${Boost_INCLUDE_DIR})
 

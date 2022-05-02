@@ -25,12 +25,16 @@ message(status "lib dir is " ${Boost_LIBRARY_DIRS})
 message("BOOST LIBRARIES LOCATION: " ${Boost_LIBRARIES})
 
 
-add_executable("namedpipe" namedpipe.cpp)
-target_link_libraries("namedpipe" PRIVATE ${Boost_LIBRARIES})
+# add_executable("namedpipe" namedpipe.cpp)
+# target_link_libraries("namedpipe" PRIVATE ${Boost_LIBRARIES})
 
 
-add_executable("client" client.cpp)
-target_link_libraries("client" PRIVATE ${Boost_LIBRARIES})
+# add_executable("client" client.cpp)
+# target_link_libraries("client" PRIVATE ${Boost_LIBRARIES})
 
-add_executable("server" server.cpp)
-target_link_libraries("server" PRIVATE ${Boost_LIBRARIES})
+# add_executable("server" server.cpp)
+# target_link_libraries("server" PRIVATE ${Boost_LIBRARIES})
+
+add_executable("winunix" winunix.cpp)
+
+target_link_libraries(winunix Ws2_32.lib)
