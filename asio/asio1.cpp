@@ -21,6 +21,9 @@ int main(){
     asio::local::stream_protocol::endpoint ep(name);
     // do not reuse addr can fix the bug.
     asio::local::stream_protocol::acceptor acceptor(ioc, ep, false);
+
+    asio::local::stream_protocol::socket socket(ioc);
+
     }
     catch(std::exception const& e)
     {

@@ -35,6 +35,9 @@ message("BOOST LIBRARIES LOCATION: " ${Boost_LIBRARIES})
 # add_executable("server" server.cpp)
 # target_link_libraries("server" PRIVATE ${Boost_LIBRARIES})
 
-add_executable("winunix" winunix.cpp)
+add_executable("clientwrite" clientwrite.cpp)
+target_link_libraries("clientwrite" PRIVATE ${Boost_LIBRARIES})
 
-target_link_libraries(winunix Ws2_32.lib)
+# add_executable("winunix" winunix.cpp)
+
+# target_link_libraries(winunix Ws2_32.lib)
