@@ -119,8 +119,8 @@ public:
     // Remove the imported private key. Most real applications
     // probably only want to import the key once and most likely not
     // in the server code. This is just for demonstration purposesq.
-    boost::system::error_code ec;
-    boost::wintls::delete_private_key(private_key_name_, ec);
+    //boost::system::error_code ec;
+    //boost::wintls::delete_private_key(private_key_name_, ec);
   }
 
 private:
