@@ -23,7 +23,13 @@ if(NOT asio_POPULATED)
   add_subdirectory(${boost-wintls_SOURCE_DIR} ${boost-wintls_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-add_executable(echoserver echo_server.cpp)
-target_link_libraries(echoserver PRIVATE boost-wintls)
-target_include_directories(echoserver PRIVATE .)
-target_compile_features(echoserver INTERFACE cxx_std_14)
+add_executable(echo_server echo_server.cpp)
+target_link_libraries(echo_server PRIVATE boost-wintls)
+target_include_directories(echo_server PRIVATE .)
+target_compile_features(echo_server INTERFACE cxx_std_14)
+
+
+add_executable(echo_client echo_client.cpp)
+target_link_libraries(echo_client PRIVATE boost-wintls)
+target_include_directories(echo_client PRIVATE .)
+target_compile_features(echo_client INTERFACE cxx_std_14)

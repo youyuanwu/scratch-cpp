@@ -109,6 +109,9 @@ public:
     // Use the certificate for encrypting TLS messages
     context_.use_certificate(cert);
 
+    // TODO: seems verify client cert is not supported
+    //context_.verify_certificate
+
     do_accept();
   }
 
