@@ -102,10 +102,6 @@ int main(int argc, char* argv[]) {
 
     boost::wintls::context ctx(boost::wintls::method::system_default);
 
-    // Convert X509 PEM bytes to Windows CERT_CONTEXT
-    //auto certificate = boost::wintls::x509_to_cert_context(boost::asio::buffer(x509_certificate),
-    //                                                       boost::wintls::file_format::pem);
-
     PCCERT_CONTEXT cert = findCert();
 
     if(!cert){

@@ -80,26 +80,6 @@ public:
     , context_(boost::wintls::method::system_default)
     , private_key_name_("wintls-echo-server-example") {
 
-    // Convert X509 PEM bytes to Windows CERT_CONTEXT
-    // auto certificate = boost::wintls::x509_to_cert_context(boost::asio::buffer(x509_certificate),
-    //                                                        boost::wintls::file_format::pem);
-
-    // // Import RSA private key into the default cryptographic provider
-    // boost::system::error_code ec;
-    // boost::wintls::import_private_key(boost::asio::buffer(rsa_key),
-    //                                   boost::wintls::file_format::pem,
-    //                                   private_key_name_,
-    //                                   ec);
-
-    // If the key already exists, assume it's the one already imported
-    // and ignore that error
-    // if (ec && ec.value() != NTE_EXISTS) {
-    //   throw boost::system::system_error(ec);
-    // }
-
-    // Use the imported private key for the certificate
-    // boost::wintls::assign_private_key(certificate.get(), private_key_name_);
-
     PCCERT_CONTEXT cert = findCert();
 
     if(!cert){
@@ -110,17 +90,12 @@ public:
     context_.use_certificate(cert);
 
     // TODO: seems verify client cert is not supported
-    //context_.verify_certificate
 
     do_accept();
   }
 
   ~server() {
-    // Remove the imported private key. Most real applications
-    // probably only want to import the key once and most likely not
-    // in the server code. This is just for demonstration purposesq.
-    //boost::system::error_code ec;
-    //boost::wintls::delete_private_key(private_key_name_, ec);
+
   }
 
 private:
