@@ -5,15 +5,18 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "certificate.hpp"
+//#include "certificate.hpp"
 
 #include <boost/wintls.hpp>
 
 #include <boost/asio.hpp>
 
+#include "findcert.hpp"
+
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+
 
 using boost::asio::ip::tcp;
 
@@ -78,27 +81,33 @@ public:
     , private_key_name_("wintls-echo-server-example") {
 
     // Convert X509 PEM bytes to Windows CERT_CONTEXT
-    auto certificate = boost::wintls::x509_to_cert_context(boost::asio::buffer(x509_certificate),
-                                                           boost::wintls::file_format::pem);
+    // auto certificate = boost::wintls::x509_to_cert_context(boost::asio::buffer(x509_certificate),
+    //                                                        boost::wintls::file_format::pem);
 
-    // Import RSA private key into the default cryptographic provider
-    boost::system::error_code ec;
-    boost::wintls::import_private_key(boost::asio::buffer(rsa_key),
-                                      boost::wintls::file_format::pem,
-                                      private_key_name_,
-                                      ec);
+    // // Import RSA private key into the default cryptographic provider
+    // boost::system::error_code ec;
+    // boost::wintls::import_private_key(boost::asio::buffer(rsa_key),
+    //                                   boost::wintls::file_format::pem,
+    //                                   private_key_name_,
+    //                                   ec);
 
     // If the key already exists, assume it's the one already imported
     // and ignore that error
-    if (ec && ec.value() != NTE_EXISTS) {
-      throw boost::system::system_error(ec);
-    }
+    // if (ec && ec.value() != NTE_EXISTS) {
+    //   throw boost::system::system_error(ec);
+    // }
 
     // Use the imported private key for the certificate
-    boost::wintls::assign_private_key(certificate.get(), private_key_name_);
+    // boost::wintls::assign_private_key(certificate.get(), private_key_name_);
+
+    PCCERT_CONTEXT cert = findCert();
+
+    if(!cert){
+      throw std::exception("cert is not found");
+    }
 
     // Use the certificate for encrypting TLS messages
-    context_.use_certificate(certificate.get());
+    context_.use_certificate(cert);
 
     do_accept();
   }
