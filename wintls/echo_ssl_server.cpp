@@ -12,6 +12,8 @@
 #include <boost/asio.hpp>
 
 #include "findcert.hpp"
+#include "echo_server.hpp"
+// #include "echo_client.hpp"
 
 #include <cstdlib>
 #include <functional>
@@ -20,10 +22,13 @@
 
 using boost::asio::ip::tcp;
 
+std::string echo_ssl_server_port = "12344";
+std::string echo_server_port = "12345";
+
 class session : public std::enable_shared_from_this<session> {
 public:
   session(boost::wintls::stream<tcp::socket> stream)
-    : stream_(std::move(stream)) {
+    : stream_(std::move(stream)), resolver_(stream_.get_executor()), endpoints_(resolver_.resolve("localhost", echo_server_port)),socket_(stream_.get_executor()) {
   }
 
   void start() {
@@ -33,6 +38,7 @@ public:
 private:
   void do_handshake() {
     auto self(shared_from_this());
+    std::cout << "ssl: start handshake" << std::endl;
     stream_.async_handshake(boost::wintls::handshake_type::server,
                             [this, self](const boost::system::error_code& ec) {
       if (!ec) {
@@ -45,9 +51,50 @@ private:
 
   void do_read() {
     auto self(shared_from_this());
+    std::cout << "ssl: start read " << std::endl;
     stream_.async_read_some(boost::asio::buffer(data_),
                             [this, self](const boost::system::error_code& ec, std::size_t length) {
       if (!ec) {
+        do_forward(length);
+      } else {
+        if (ec.value() != SEC_I_CONTEXT_EXPIRED) { // SEC_I_CONTEXT_EXPIRED means the client shutdown the TLS channel
+          std::cerr << "Read failed: " << ec.message() << "\n";
+        }
+      }
+    });
+  }
+
+  void do_forward(std::size_t length) {
+    auto self(shared_from_this());
+
+    std::cout << "ssl: start forward connect " << std::endl;
+    boost::asio::async_connect(socket_, endpoints_, 
+      [this, self,length](const boost::system::error_code& ec,
+          const tcp::endpoint& /*endpoint*/){
+        
+        if(!ec){
+          std::cout << "ssl: forward data: " << data_ << std::endl;
+          boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
+                                [this, self](const boost::system::error_code& ec, std::size_t /*length*/) {
+            if (!ec) {
+              do_forward_read();
+            } else {
+              std::cerr << "do forward Write failed: " << ec.message() << "\n";
+            }
+          });
+        } else{
+          std::cerr << "do forward connect failed: " << ec.message() << "\n";
+        }
+    });
+    // boost::asio::connect(s, );
+  }
+
+  void do_forward_read() {
+    auto self(shared_from_this());
+    socket_.async_read_some(boost::asio::buffer(forward_data_),
+                            [this, self](const boost::system::error_code& ec, std::size_t length) {
+      if (!ec) {
+        std::cout << "ssl: forward read data: " << forward_data_ << std::endl;
         do_write(length);
       } else {
         if (ec.value() != SEC_I_CONTEXT_EXPIRED) { // SEC_I_CONTEXT_EXPIRED means the client shutdown the TLS channel
@@ -59,7 +106,8 @@ private:
 
   void do_write(std::size_t length) {
     auto self(shared_from_this());
-    boost::asio::async_write(stream_, boost::asio::buffer(data_, length),
+    std::cout << "ssl: write data back to client: " << forward_data_ << std::endl;
+    boost::asio::async_write(stream_, boost::asio::buffer(forward_data_, length),
                              [this, self](const boost::system::error_code& ec, std::size_t /*length*/) {
       if (!ec) {
         do_read();
@@ -71,6 +119,10 @@ private:
 
   boost::wintls::stream<tcp::socket> stream_;
   char data_[1024];
+  char forward_data_[1024];
+  tcp::resolver resolver_;
+  boost::asio::ip::basic_resolver_results<boost::asio::ip::tcp> endpoints_;
+  tcp::socket socket_;
 };
 
 class server {
@@ -116,20 +168,43 @@ private:
   std::string private_key_name_;
 };
 
-int main(int argc, char* argv[]) {
+int main() {
   try {
-    if (argc != 2) {
-      std::cerr << "Usage: server <port>\n";
-      return 1;
-    }
-
     boost::asio::io_context io_context;
-    server s(io_context, static_cast<std::uint16_t>(std::atoi(argv[1])));
 
-    io_context.run();
+    // raw echo server
+    echo_server::server es(io_context, 12345);
+
+    // ssl wrapper server
+    // ssl echo server
+    boost::asio::io_context io_context2;
+    server s(io_context2, static_cast<unsigned short>(std::atoi(echo_ssl_server_port.c_str())));
+
+    std::thread t2([&io_context](){
+      io_context.run();
+    }); 
+    
+   io_context2.run();
+    t2.join();
   } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 
   return 0;
 }
+
+// int main(){
+//       try
+//   {
+
+//     boost::asio::io_context io_context;
+
+//     echo_server::server s(io_context, 12345);
+
+//     io_context.run();
+//   }
+//   catch (std::exception& e)
+//   {
+//     std::cerr << "Exception: " << e.what() << "\n";
+//   }
+// }
