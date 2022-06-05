@@ -73,7 +73,7 @@ private:
           const tcp::endpoint& /*endpoint*/){
         
         if(!ec){
-          std::cout << "ssl: forward data: " << data_ << std::endl;
+          std::cout << "ssl: forward data: " << std::string(data_, length) << std::endl;
           boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
                                 [this, self](const boost::system::error_code& ec, std::size_t /*length*/) {
             if (!ec) {
@@ -94,7 +94,7 @@ private:
     socket_.async_read_some(boost::asio::buffer(forward_data_),
                             [this, self](const boost::system::error_code& ec, std::size_t length) {
       if (!ec) {
-        std::cout << "ssl: forward read data: " << forward_data_ << std::endl;
+        std::cout << "ssl: forward read data: " << length << ": " << std::string(forward_data_, length) << std::endl;
         do_write(length);
       } else {
         if (ec.value() != SEC_I_CONTEXT_EXPIRED) { // SEC_I_CONTEXT_EXPIRED means the client shutdown the TLS channel
@@ -106,7 +106,7 @@ private:
 
   void do_write(std::size_t length) {
     auto self(shared_from_this());
-    std::cout << "ssl: write data back to client: " << forward_data_ << std::endl;
+    std::cout << "ssl: write data back to client: " << std::string(forward_data_,length) << std::endl;
     boost::asio::async_write(stream_, boost::asio::buffer(forward_data_, length),
                              [this, self](const boost::system::error_code& ec, std::size_t /*length*/) {
       if (!ec) {
