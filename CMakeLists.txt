@@ -7,5 +7,7 @@ project(scratch-cpp)
 #add_subdirectory(io)
 # add_subdirectory(winio)
 
-add_subdirectory(winpfx)
-add_subdirectory(wintls)
+#add_subdirectory(winpfx)
+#add_subdirectory(wintls)
+
+add_subdirectory(winhttpapi)
