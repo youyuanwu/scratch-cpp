@@ -319,7 +319,7 @@ int __cdecl wmain(
     //     return -1;
     // }
 
-    std::wstring url = L"https://localhost:12345/winhttpapitest/";
+    std::wstring url = L"https://localhost:12356/winhttpapitest/";
 
     // SSL stuff
     HTTP_SERVICE_CONFIG_SSL_SET configInformation;
@@ -344,15 +344,23 @@ int __cdecl wmain(
     // configInformation.KeyDesc.pIpPort = &addr;
     
     // option2
-    SOCKADDR socket2 = {0};
-    configInformation.KeyDesc.pIpPort = &socket2;
-    inet_pton(AF_INET, "0.0.0.0", configInformation.KeyDesc.pIpPort);
+    // SOCKADDR socket2 = {0};
+    // configInformation.KeyDesc.pIpPort = &socket2;
+    // inet_pton(AF_INET, "localhost:12356", configInformation.KeyDesc.pIpPort);
 
     // option3
     // SOCKADDR socket = {0};
     // socket.sa_family = AF_INET;
     // reinterpret_cast<sockaddr_in *>(&socket)->sin_port = htons(12345);
     //configInformation.KeyDesc.pIpPort = &socket;
+
+    // option4
+    sockaddr_in addr4 = { 0 };
+    addr4.sin_addr.s_addr = inet_addr("0.0.0.0");
+    addr4.sin_family = AF_INET;
+    addr4.sin_port = htons(12356);
+    configInformation.KeyDesc.pIpPort = (PSOCKADDR)&addr4;
+
 
     HTTP_SERVICE_CONFIG_SSL_PARAM & param = configInformation.ParamDesc;
     // TODO: need to set the hash of the cert.
@@ -361,18 +369,36 @@ int __cdecl wmain(
     // {
     //     return retCode;
     // }
+    BYTE ServerCertHash[] = {0xF5, 0xF3,0x7D,0xB9,0x02,0x32,0x10,0xDA,0xE1,0x0D,0x1E,0x10,0x24,0x7B,0x7B,0xA3,0x1A,0xDD,0x26,0xFF};
     param.DefaultCertCheckMode = 1; // Do not verify client cert for now.
-    param.pSslHash = "AB5CA0F9A3C2D51F9F51B2AF5F34C8EE14233F3A";
-    param.SslHashLength = 40;
+    //param.pSslHash = "F5F37DB9023210DAE10D1E10247B7BA31ADD26FF";
+    param.pSslHash =(void*)ServerCertHash;
+    param.SslHashLength = ARRAYSIZE(ServerCertHash);
+    // 4DBFB575-E1EF-4239-9A1D-E94CF84DC22D
     param.AppId = {0x4dbfb575, 0xe1ef, 0x4239,{0x9a, 0x1d, 0xe9, 0x4c, 0xf8, 0x4d, 0xc2, 0x2d}};
-    param.pSslCertStoreName = NULL;
+    param.pSslCertStoreName = 0; 
     param.DefaultFlags = 0;
     param.DefaultRevocationFreshnessTime = 0;
-    param.DefaultRevocationUrlRetrievalTimeout  = 0;
+    param.DefaultRevocationUrlRetrievalTimeout  = 10000;
     param.pDefaultSslCtlIdentifier = NULL;
     param.pDefaultSslCtlStoreName = NULL;
 
-    // std::cout << "uuid is " << param.AppId << std::endl;
+    std::cout << "hash is" << std::string((char*)configInformation.ParamDesc.pSslHash) << std::endl;
+    std::cout << "hash len is" << configInformation.ParamDesc.SslHashLength << std::endl;
+
+    wchar_t buff[128];
+    retCode = StringFromGUID2(
+    param.AppId,
+    &buff[0],
+    128);
+
+    if(retCode == 0)
+    {
+        std::cout << "uuid convert failed" <<std::endl;
+        return 1;
+    }
+    std::wstring uuid(&buff[0], &buff[0]+retCode);
+    std::wcout << L"uuid is "<< uuid << std::endl;
 
     //
     // Initialize HTTP Server APIs
@@ -396,7 +422,7 @@ int __cdecl wmain(
         sizeof(configInformation),
         NULL /*reserved*/);
 
-    if (retCode != NO_ERROR)
+    if (retCode != NO_ERROR && retCode != ERROR_ALREADY_EXISTS)
     {
         wprintf(L"HttpSetServiceConfiguration failed with %lu \n", retCode);
         return retCode;
