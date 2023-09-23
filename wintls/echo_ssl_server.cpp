@@ -142,6 +142,7 @@ public:
     context_.use_certificate(cert);
 
     // TODO: seems verify client cert is not supported
+    std::cout << "ssl server likstening on port: " << std::to_string(port) << std::endl;
 
     do_accept();
   }

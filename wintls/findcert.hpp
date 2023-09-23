@@ -19,7 +19,7 @@ PCCERT_CONTEXT findCert(){
      0,                      // Encoding type not needed 
                              // with this PROV
      NULL,                   // Accept the default HCRYPTPROV
-     CERT_SYSTEM_STORE_CURRENT_USER,
+     CERT_SYSTEM_STORE_CURRENT_USER | CERT_STORE_READONLY_FLAG,
                              // Set the system store location in the
                              // registry
      L"MY");                 // Could have used other predefined 
@@ -44,7 +44,7 @@ PCCERT_CONTEXT findCert(){
       CERT_FIND_SUBJECT_STR,        // Find a certificate with a
                                     // subject that matches the 
                                     // string in the next parameter
-      L"Patti Fuller",              // The Unicode string to be found
+      L"Youyuan Wu Test",              // The Unicode string to be found
                                     // in a certificate's subject
       NULL);                        // NULL for the first call to the
                                     // function 

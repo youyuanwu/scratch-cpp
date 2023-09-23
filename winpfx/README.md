@@ -8,10 +8,13 @@ Generated and export pfx using c/c++ win32 apis.
 ```
 
 generate a test cert exportable
-```
+```ps1
 New-SelfSignedCertificate -Type Custom -Subject "CN=Youyuan Wu Test" `
     -KeyExportPolicy NonExportable -KeyUsage DigitalSignature -KeyAlgorithm RSA -KeyLength 2048 -CertStoreLocation "Cert:\CurrentUser\My" `
     -Provider "Microsoft Platform Crypto Provider"
+New-SelfSignedCertificate -Type Custom -Subject "CN=Youyuan Wu Test" `
+    -KeyExportPolicy NonExportable -KeyUsage DigitalSignature -KeyAlgorithm RSA -KeyLength 2048 -CertStoreLocation "Cert:\CurrentUser\My" `
+    -Provider "Microsoft Software Key Storage Provider"
 New-SelfSignedCertificate -Type Custom -Subject "CN=Youyuan Wu Test" `
     -KeyExportPolicy Exportable -KeyUsage DigitalSignature -KeyAlgorithm RSA -KeyLength 2048 -CertStoreLocation "Cert:\CurrentUser\My"`
     -Provider "Microsoft Software Key Storage Provider"
